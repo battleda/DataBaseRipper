@@ -1,4 +1,4 @@
-package org.example;
+package org.sdv;
 
 /**
  * Hello world!
