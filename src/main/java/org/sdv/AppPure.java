@@ -1,25 +1,21 @@
 package org.sdv;
 
+import org.sdv.dao.pure.ConnectionClassSingleton;
+
 import java.sql.*;
 
 /**
- * Hello world!
+ * Чистейший не замутненный подход
  *
  */
-public class App 
+public class AppPure
 {
     public static void main( String[] args )
     {
-        String jdbcURL = "jdbc:postgresql://localhost:5432/postgres";
-        String username = "postgres";
-        String password = "postgres";
         try {
-            //Загрузка Postgres JDBC driver
-            Class.forName("org.postgresql.Driver");
-
-            //Установить соединение
-            Connection connection = DriverManager.getConnection(jdbcURL, username, password);
-            System.out.println( "Подключение к Postgres установлено!" );
+            //Установить соединение через олдскульный нетрушный синглтон
+            Connection connection = ConnectionClassSingleton.getInstance().getConnection();
+            System.out.println("Подключение к Postgres установлено!");
 
             //Создать запрос
             Statement statement = connection.createStatement();
@@ -41,13 +37,13 @@ public class App
 
             ResultSet resultSet = statement.executeQuery(selectSQL);
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 System.out.println(
                         "User ID: " + resultSet.getInt("id")
-                        + ", Name: "
-                        + resultSet.getString("name")
-                        + ", Email: "
-                        + resultSet.getString("email")
+                                + ", Name: "
+                                + resultSet.getString("name")
+                                + ", Email: "
+                                + resultSet.getString("email")
                 );
             }
 
@@ -55,8 +51,6 @@ public class App
             connection.close();
             System.out.println("Соединение закрыто!");
 
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
