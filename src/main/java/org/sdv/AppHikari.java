@@ -1,19 +1,19 @@
 package org.sdv;
 
-import org.sdv.dao.pure.ConnectionClassSingleton;
+import org.sdv.dao.hikari.DatabasePool;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-/**
- * Чистейший не замутненный подход
- *
- */
-public class AppPure
-{
-    public static void main( String[] args ) {
+public class AppHikari {
+
+    public static void main(String[] args) {
         try {
-            //Установить соединение через олдскульный нетрушный синглтон
-            Connection connection = ConnectionClassSingleton.getInstance().getConnection();
+            //Получить соединение из DatabasePool с привлечением HikariCP
+            Connection connection = DatabasePool.getConnection();
+
             System.out.println("Подключение к Postgres установлено!");
 
             //Создать запрос
@@ -23,10 +23,10 @@ public class AppPure
             String createTableSQL = "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(50), email VARCHAR(50))";
 
             statement.execute(createTableSQL);
-            System.out.println("Таблица 'user' создана!");
+            System.out.println("Таблица 'users' создана!");
 
             //Вставить строку в таблицу
-            String insertSQL = "INSERT INTO users(name, email) VALUES('John Doe', 'john.doe@example.com')";
+            String insertSQL = "INSERT INTO users(name email) VALUES('John Doe', 'john.doe@example.com')";
 
             statement.executeUpdate(insertSQL);
             System.out.println("Данные вставлены в таблицу!");
@@ -36,23 +36,21 @@ public class AppPure
 
             ResultSet resultSet = statement.executeQuery(selectSQL);
 
-            while (resultSet.next()) {
+            while(resultSet.next()) {
                 System.out.println(
                         "User ID: " + resultSet.getInt("id")
-                                + ", Name: "
-                                + resultSet.getString("name")
-                                + ", Email: "
-                                + resultSet.getString("email")
+                        + ", Name: "
+                        + resultSet.getString("name")
+                        + ", Email: "
+                        + resultSet.getString("email")
                 );
             }
 
-            //Закрыть соединение
-            connection.close();
-            System.out.println("Соединение закрыто!");
+            //Закрыть
+            DatabasePool.closePool();
 
-        } catch (SQLException e) {
+        } catch(SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
